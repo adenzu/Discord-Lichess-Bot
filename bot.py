@@ -8,27 +8,35 @@ import discord
 import asyncio
 
 
+# Get bot token.
 token = ""
+with open("token.txt", "r") as token_file:
+	token = token_file.read()
+
+# Start client.
 client = discord.Client()
 
+# Enum variables for error handlings.
+ACCOUNT_CLOSED 		= 0
+GAME_NOT_FOUND 		= 1
+COMMAND_NOT_FOUND 	= 2
+ACCOUNT_NOT_FOUND 	= 3
+PLAYED_ZERO_GAMES 	= 4
+GAME_NOT_LIVE 		= 5
+GAME_LIVE 			= 6
+NO_NEW_MOVE 		= 7
 
-ACCOUNT_CLOSED = 0
-GAME_NOT_FOUND = 1
-COMMAND_NOT_FOUND = 2
-ACCOUNT_NOT_FOUND = 3
-PLAYED_ZERO_GAMES = 4
-GAME_NOT_LIVE = 5
-GAME_LIVE = 6
-NO_NEW_MOVE = 7
-
+# Some of Discord's emote colours.
 DISCORD_GREEN = discord.Colour.from_rgb(120, 177, 59)
 DISCORD_BLACK = discord.Colour.from_rgb(49, 55, 61)
 
+# Command prefix for bot to understand commands.
 COMMAND_PREFIX = "!lc"
 
+# You can watch chess games on lichess real time. This variable is the duration between move checks for live games.
 LIVE_GAMES_REFRESH_RATE = 0.05
 
-
+# Dictionary for explaining how to use existing commands.
 command_usages = {
 	"help" : f"{COMMAND_PREFIX} help <command>",
 	"user" : f"{COMMAND_PREFIX} user [user name]",
@@ -37,6 +45,7 @@ command_usages = {
 	"tv"   : f"{COMMAND_PREFIX} tv [game type]"
 }
 
+# Dictionary for explaining how existing commands work.
 command_explanations = {
 	"help" : "Explains given command. If no command is given explains how command `help` works and shows other commands. <...> indicates the parameter is optional, [...] means it's obligatory.",
 	"user" : "Gives information about given user.",
@@ -45,6 +54,10 @@ command_explanations = {
 	"tv"   : "Shows current streaming chess game with given game type.",
 }
 
+# This dictionary is for converting pychess board ASCII graphic to discort emote-image-thingy.
+# 
+# PROBLEM: Since one board consists of 64 squares, 64 emotes are used for representing the board,
+# thus emotes in final message gets shrinked.
 EMOTE_PIECE_SYMBOLS = {
     "R0": "<:wr0:757566867521929257>", "r0" : "<:br0:757566865227907083>",
     "N0": "<:wn0:757566866171625534>", "n0" : "<:bn0:757566863998844959>",
@@ -61,73 +74,111 @@ EMOTE_PIECE_SYMBOLS = {
       1 : "<:blank1:757566863608774679>", 0 : "<:blank0:757566863684272228>"
 }
 
+# This list contains live games that are watched through discord.
 live_games = []
 
-
+# Class for the live games so they can be managed more easily.
+# 
+# PROBLEM: 	The emote representation of board is created from scratch whenever there's 
+# 			a new move to edit the message, not efficient.
+# FIX:		Emote representation of the board can be stored in a 2D array, and altered
+# 			just slightly for the new moves.
 class LiveGame:
 
+	# @param {str} game_id An id of a chess game that is played on lichess.
 	def __init__(self, game_id):
 
-		self.game_id  = game_id
-		self.board    = chess.Board() 
-		self.moves    = ""
-		self.message  = None
+		self.game_id  = game_id 		# Stores its game id, since lichess.api returns not an object for a game
+										# but a dictionary for current status for it, this will be needed.  
+		self.board    = chess.Board() 	# Initializes new chess board for the game. 
+		self.moves    = ""				# Contains all the moves that is played til now.
+		self.message  = None 			# Whenever a new move is played, the message that contains game's 
+										# representation (consisting of emotes) has to be updated, thus
+										# has to be stored to be edited later.
 		self.new_move = False
 
-		self.update_game()
+		self.update_game()	# To create new needed variables and update existing ones.
 
+
+	# Equality result is dependant on the game's id. Not the object itself.
+	# @param  {_}		other 	The other value in the equality operation.
+	# @return {boolean}			The result of logical equality operation.
 	def __eq__(self, other):
-		return self.game_id == other
 
+		if type(other) == LiveGame:				 # Specify the probability of two LiveGame object equality operation.
+												 # Otherwise unlimited recursion is sure to appear.
+			return self.game_id == other.game_id
+		return self.game_id == other # In this case 'other' may be a string consisting of a game id.
+
+
+	# Updates already existing variables, and creates some when it's ran for the first time.
 	def update_game(self):
-		game = get_game_with_id(self.game_id)
+		game = get_game_with_id(self.game_id)	# Gets game's status dict with function get_game_with_id. 
 
-		if game == GAME_NOT_FOUND:
-			self.status =  GAME_NOT_FOUND
+		if game == GAME_NOT_FOUND:			# If instead of a dictionary, warning GAME_NOT_FOUND is returned.
+			self.status =  GAME_NOT_FOUND	# Set status to GAME_NOT_FOUND.
 
-		elif game["status"] != "started":
-			self.status =  GAME_NOT_LIVE
+		elif game["status"] != "started":	# If game's status that is given in the dict is not started;
+											# status may be 'aborted' or 'ended'. Both cases indicate
+											# game does not continue.
+			self.status =  GAME_NOT_LIVE	# Set status to GAME_NOT_LIVE
 
 		else:
-			moves = game["moves"]
+			moves = game["moves"]			 # Get already played moves. This is a string.
 
-			self_moves_len = len(self.moves)
+			self_moves_len = len(self.moves) # Get last played moves' string length.
 
-			if len(moves) > self_moves_len:
-				self.play_moves(moves[self_moves_len:].split())
-				self.moves = moves
-				self.new_move = True
+			if len(moves) > self_moves_len:	 					# If new got moves string is longer than previous. 
+																# This means new move is played.
+				self.play_moves(moves[self_moves_len:].split())	# Play the new moves.
+				self.moves = moves 		# Update moves.
+				self.new_move = True	# Set new_move to True, because new moves are played.
 			else:
-				self.new_move = False
+				self.new_move = False	# Set False, since no new move is played.
 
-			self.status = GAME_LIVE
+			self.status = GAME_LIVE 	# Since game is not proven to be ended or aborted, status is set to GAME_LIVE.
 
+
+	# Moves given moves that are given on the LiveGame object's board.
+	# @param {List} moves A list of SAN type of move strings.
+	# 
+	# PROBLEM: If other move type different than SAN is passed, this won't work. But that is impossible for the time being.
 	def play_moves(self, moves):
-
 		for move in moves:
 			self.board.push_san(move)
 
+
+	# Returns a png image of the current situation of the board. Should be functional, yet to be used.
+	# @return {PIL.Image} Png image of board.
 	def get_board_image(self):
 		return get_board_image(self.board)
 
+
+	# Returns a representation of the current situation of the board that is made up of emotes.
+	# @return {str} Board's representation consisting of emotes. 
 	def get_board_emote_message(self):
 		return get_board_emote_message(self.board)
 
+
+	# Returns the new representation of the board if there's any new moves. Else returns warning.
+	# @return {str|WARNING_ID=int} New representation of the board, or warning.  
 	def get_update_message(self):
-		self.update_game()
+		self.update_game()	# Update the game before updating the message.
 
-		if self.status == GAME_LIVE:
-
-			if self.new_move:
-				update_message = self.get_board_emote_message()
+		if self.status == GAME_LIVE:	# If game is still going on.
+			if self.new_move:			# If any new move is played.
+				update_message = self.get_board_emote_message()	# Get new message content.
 			else:
-				update_message = NO_NEW_MOVE
-		else:
+				update_message = NO_NEW_MOVE # If no new move is played return NO_NEW_MOVE.
+		else:	# If game is not going on.
 			update_message = self.message.content + "\n\nGame ended."
 
 		return update_message
 
 
+# Gets the chess game with the given id. Then returns it.
+# @param 	{str}	Id of a chess game that is played on lichess. 
+# @return 	{dict}	The dictionary that contains information about the game.
 def get_game_with_id(game_id):
 
 	try:
@@ -138,6 +189,7 @@ def get_game_with_id(game_id):
 	return game
 
 
+# Gets a list of games of given player, starting from last played to first played.
 def get_player_games(player_name, n=1):
 
 	try:
@@ -420,9 +472,6 @@ def manage_commands(message):
 
 	return message.channel.send(answer)
 
-
-with open("token.txt", "r") as token_file:
-	token = token_file.read()
 
 @client.event
 async def on_ready():
