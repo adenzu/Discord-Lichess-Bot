@@ -5,4 +5,4 @@ Existing Features:
 
 Planned Features:
 	Able to show puzzles from Lichess.
-	
+	Able to show specified user's nth game.

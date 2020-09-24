@@ -54,7 +54,7 @@ command_explanations = {
 	"tv"   : "Shows current streaming chess game with given game type.",
 }
 
-# This dictionary is for converting pychess board ASCII graphic to discort emote-image-thingy.
+# This dictionary is for converting pychess board ASCII graphic to discord emote-image-thingy.
 # 
 # PROBLEM: Since one board consists of 64 squares, 64 emotes are used for representing the board,
 # thus emotes in final message gets shrinked.
