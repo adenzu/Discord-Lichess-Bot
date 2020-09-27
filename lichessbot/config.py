@@ -1,6 +1,12 @@
-from lichessbot.tok import BOT_TOKEN, LICHESS_TOKEN
+
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 import discord
+
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
 
 COMMAND_PREFIX = "!lc"
 
