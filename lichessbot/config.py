@@ -1,9 +1,17 @@
+from lichessbot.command import Command
+from lichessbot.client import client
 
-import os
+
 from dotenv import load_dotenv
 load_dotenv()
 
+import os
 import discord
+
+
+
+COMMAND_LIST = Command.__subclasses__()
+
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
@@ -32,3 +40,6 @@ EMOTE_PIECE_SYMBOLS = {
     "P1": "<:wp1:757566866964349028>", "p1" : "<:bp1:757566864573595658>",
     ".1": "<:blank1:757566863608774679>", ".0" : "<:blank0:757566863684272228>"
 }
+
+
+GAME_MODES = list(client.games.get_tv_channels().keys())

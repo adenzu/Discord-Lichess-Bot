@@ -6,7 +6,6 @@ from lichessbot.call import *
 
 import discord
 
-command_list = Command.__subclasses__()
 
 
 bot = discord.Client()
@@ -31,7 +30,7 @@ async def on_message(message):
 		try:
 			call = Call(message)
 
-			for cmd in command_list:
+			for cmd in COMMAND_LIST:
 				if call.command == cmd.name or call.command in cmd.aliases:
 					
 					if cmd.name != "help":
@@ -46,10 +45,3 @@ async def on_message(message):
 
 		except NoCommand:
 			await handle_error(message, NoCommand)
-
-	#silly joke, delete when publish
-	elif message.content == "bot kardeşliği":
-		await message.channel.send("<@759052012150063138> gel la <:peepoHug:724583310994702407>")
-
-
-

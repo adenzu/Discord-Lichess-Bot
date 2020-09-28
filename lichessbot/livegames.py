@@ -27,7 +27,10 @@ class LiveGame:
 
 		self.board = chess.Board()
 		
-		self.message = None
+		self.board_message = None
+		self.white_message = None
+		self.black_message = None
+
 		self.game_info = None
 		self.move_count = 0
 		self.penalty_time = 0
@@ -72,7 +75,7 @@ class LiveGame:
 	async def update_message(self):
 
 		try:
-			await self.message.edit(content=self.get_emote_representation())
+			await self.board_message.edit(content=f"{self.black_message}\n{self.get_emote_representation()}\n{self.white_message}")
 		except AttributeError:
 			return
 
@@ -107,5 +110,5 @@ class LiveGame:
 			return
 
 		if self.game_info["status"] != "started":
-			await self.message.edit(content=f"{self.message.content }\n\nGame ended.")
+			await self.board_message.edit(content=f"{self.board_message.content }\n\nGame ended.")
 			ongoing_games.remove(self)

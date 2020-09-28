@@ -4,6 +4,7 @@ from lichessbot.exceptions import *
 from lichessbot.parameter import *
 from lichessbot.util import *
 
+
 class CommandHelp(Command):
 
 	name = "help"

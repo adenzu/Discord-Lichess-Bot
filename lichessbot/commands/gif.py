@@ -11,7 +11,7 @@ class CommandGif(Command):
 	name = "gif"
 	help_string = "View gif of a chess game."
 	aliases = []
-	parameters = [ParamGameID(), ParamString("color", required=False)]
+	parameters = [ParamGameID(), ParamColor(required=False)]
 
 	@classmethod
 	async def run(self, command_call):

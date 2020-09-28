@@ -9,10 +9,19 @@ from lichessbot.util import *
 import discord
 
 
-async def create_livegame(command_call, game_id):
+async def create_livegame(command_call, game_id, game_info):
 	game = LiveGame(game_id)
 	await game.update_game()
-	game.message = await command_call.channel.send(game.get_emote_representation())
+
+	white = game_info["players"]["white"]
+	white_r = str(white["rating"])
+
+	black = game_info["players"]["black"]
+	black_r = str(black["rating"])
+
+	game.black_message = f"`{black['user']['name']}".ljust(24 - len(black_r))+black_r+"`"
+	game.white_message = f"`{white['user']['name']}".ljust(24 - len(white_r))+white_r+"`"
+	game.board_message = await command_call.channel.send(content=f"{game.black_message}\n{game.get_emote_representation()}\n{game.white_message}")
 
 
 class CommandWatchGame(Command):
@@ -37,7 +46,7 @@ class CommandWatchGame(Command):
 			await command_call.channel.send(f"Game with the id `{game_id}` is ended. Use `{COMMAND_PREFIX} gif {game_id}` instead.")
 			return
 
-		await create_livegame(command_call, game_id)
+		await create_livegame(command_call, game_id, game_info)
 
 
 class CommandWatchUser(Command):
@@ -64,7 +73,7 @@ class CommandWatchUser(Command):
 
 		game_id = user_info["playing"].split("/")[-2]
 
-		await create_livegame(command_call, game_id)
+		await create_livegame(command_call, game_id, client.games.export(game_id))
 
 
 
@@ -81,6 +90,7 @@ class CommandWatchTv(Command):
 		if command_call.args[0] == ParamString.null:
 			game_mode = "Top Rated"
 			game_id = client.games.get_tv_channels()[game_mode]["gameId"]
+			game_info = client.games.export(game_id)
 		else:
 			game_mode = command_call.args[0].lower()
 
@@ -102,4 +112,4 @@ class CommandWatchTv(Command):
 			await command_call.channel.send(f"Lichess TV has not selected a new {game_mode} game yet.")
 			return
 
-		await create_livegame(command_call, game_id)
+		await create_livegame(command_call, game_id, game_info)
