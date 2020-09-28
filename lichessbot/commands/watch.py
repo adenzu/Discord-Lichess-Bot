@@ -73,25 +73,30 @@ class CommandWatchTv(Command):
 	name = "watch-tv"
 	help_string = "Watch a game mode of TV channels."
 	aliases = ["tv"]
-	parameters = [ParamString("game mode")]
+	parameters = [ParamString("game mode", required=False)]
 
 	@classmethod
 	async def run(self, command_call):
 
-		game_mode = command_call.args[0].lower()
+		if command_call.args[0] == ParamString.null:
+			game_mode = "Top Rated"
+			game_id = client.games.get_tv_channels()[game_mode]["gameId"]
+		else:
+			game_mode = command_call.args[0].lower()
 
-		try:
-			tv_games = client.games.get_tv_channels()
+			try:
+				tv_games = client.games.get_tv_channels()
 
-			for mode in tv_games:
-				if mode.lower() == game_mode:
-					game_id = tv_games[mode]["gameId"]
+				for mode in tv_games:
+					if mode.lower() == game_mode:
+						game_id = tv_games[mode]["gameId"]
+					
+				game_info = client.games.export(game_id)
 
-		except KeyError:
-			await command_call.channel.send(f"{game_mode} is not a valid game mode.")
-			return
+			except UnboundLocalError:
+				await command_call.channel.send(f"{game_mode} is not a valid game mode.")
+				return
 
-		game_info = client.games.export(game_id)
 
 		if game_info["status"] != "started":
 			await command_call.channel.send(f"Lichess TV has not selected a new {game_mode} game yet.")

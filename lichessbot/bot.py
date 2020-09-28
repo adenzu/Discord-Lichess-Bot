@@ -28,10 +28,6 @@ async def on_message(message):
 
 	elif message.content.startswith(COMMAND_PREFIX) and not message.author.bot:
 		
-		if message.content.find("milko") != -1:
-			await message.channel.send("<:peepoHug:724583310994702407> <@157560177539809280>")
-			return
-			
 		try:
 			call = Call(message)
 

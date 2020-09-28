@@ -13,7 +13,7 @@ class CommandUser(Command):
 	name = "user"
 	help_string = "View a user's profile."
 	aliases = ["profile", "player"]
-	parameters = [ParamString("user id")]
+	parameters = [ParamString("user")]
 
 	@classmethod
 	async def run(self, command_call):
@@ -32,10 +32,15 @@ class CommandUser(Command):
 
 			embed_color = DISCORD_GREEN if user_public_data["online"] else discord.Embed.Empty
 
+
+
 			try:
 				bio = user_public_data["profile"]["bio"]
 			except KeyError:
 				bio = ""
+
+
+
 
 			play_time = seconds_conversion(user_public_data["playTime"]["total"])
 
@@ -45,11 +50,13 @@ class CommandUser(Command):
 				if play_time[period]:
 					play_time_string += f" {play_time[period]} {period},"
 
-			if len(play_time):
-				play_time_string = f"Playtime: {play_time_string[:-1]}\n"
+			if sum(play_time.values()):
+				play_time_string = f"\nPlaytime: {play_time_string[:-1]}\n"
+
+
+
 
 			player_game_gen = get_user_games(user_id)
-
 			try:
 				last_played_game_str = f"Last played game: https://lichess.org/{next(player_game_gen)['id']}\n"  
 			except StopIteration:
@@ -61,14 +68,17 @@ class CommandUser(Command):
 			except KeyError:
 				currently_playing_str = ""
 
+
+
 			user_info_string = """
 			{}
+			Member since {}
 
-			{}{}
-			{}
-			Link: https://lichess.org/@/{}
-			""".format(bio, currently_playing_str, last_played_game_str, play_time_string, user_id)
+			{}{}{}
+			""".format(bio, user_public_data["createdAt"].strftime("%m/%d/%Y"), currently_playing_str, last_played_game_str, play_time_string)
 
-			embed = discord.Embed(title=user_public_data["username"], description=user_info_string, color=embed_color)
+
+
+			embed = discord.Embed(title=user_public_data["username"], description=user_info_string, color=embed_color, url=f"https://lichess.org/@/{user_id}")
 
 			await command_call.channel.send(embed=embed)
