@@ -26,7 +26,7 @@ class Command():
 					parsed_arg = curr_param.parse(command_call, command_call.raw_args[i])
 
 					if parsed_arg == None:
-						await command_call.channel.send(f"Invalid input for: `{curr_param.name}` of type `{curr_param.type_name}`!\nUsage: `{self.usage_string()}`")
+						await command_call.channel.send(f"Invalid input for: `{curr_param.get_name()}` of type `{curr_param.get_type_name()}`!\nUsage: `{self.usage_string()}`")
 						return
 
 					command_call.args[i] = parsed_arg
@@ -34,7 +34,7 @@ class Command():
 				except IndexError:
 
 					if curr_param.required:
-						await command_call.channel.send(f"You must specify: `{curr_param.name}` of type `{curr_param.type_name}`!\nUsage: `{self.usage_string()}`")
+						await command_call.channel.send(f"You must specify: `{curr_param.get_name()}` of type `{curr_param.get_type_name()}`!\nUsage: `{self.usage_string()}`")
 						return
 
 			await self.run(command_call)

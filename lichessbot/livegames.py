@@ -1,5 +1,6 @@
 from lichessbot.client import *
 from lichessbot.config import *
+from lichessbot.call import *
 
 
 import numpy as np
@@ -19,6 +20,15 @@ async def update_live_games():
 		await asyncio.sleep(LIVE_GAME_REFRESH_RATE)
 
 
+class LiveMessage:
+
+	def __init__(self, message):
+		self.message = message
+
+	async def update_message(self):
+		return
+
+
 class LiveGame:
 
 	def __init__(self, game_id):
@@ -30,6 +40,7 @@ class LiveGame:
 		self.board_message = None
 		self.white_message = None
 		self.black_message = None
+		self.author = None
 
 		self.game_info = None
 		self.move_count = 0
@@ -37,6 +48,15 @@ class LiveGame:
 		self.check_since_last_move = 0
 
 		ongoing_games.append(self)
+
+	def __eq__(self, other):
+
+		if type(other) == LiveGame:
+			return (self.game_id == other.game_id and self.board_message.channel == other.board_message.channel)
+		elif type(other) == tuple:
+			return (self.game_id == other[0] and self.board_message.channel == other[1])
+
+		return self.game_id == other
 
 	def get_game_info(self):
 		self.game_info = client.games.export(self.game_id)
@@ -49,13 +69,9 @@ class LiveGame:
 		return self.get_move().split()
 
 	def play_moves(self, move_list):
-
-		uci_equals = []
-
 		for move in move_list:
-			uci_equals.append(str(self.board.push_san(move)))
+			self.board.push_san(move)
 
-		return uci_equals
 
 	def get_emote_representation(self):
 

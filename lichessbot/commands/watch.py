@@ -9,17 +9,20 @@ from lichessbot.util import *
 import discord
 
 
-async def create_livegame(command_call, game_id, game_info, author):
+async def create_livegame(command_call, game_id, game_info):
+	
+	if (game_id, command_call.channel) in ongoing_games:
+		return False
+
 	game = LiveGame(game_id)
 
 	await game.update_game()
-	game.author = author
+	game.author = command_call.author
 
 	white = game_info["players"]["white"]
 
 	black = game_info["players"]["black"]
 	
-
 	try:
 		white_name = white['user']['name']
 
@@ -48,6 +51,7 @@ async def create_livegame(command_call, game_id, game_info, author):
 	game.black_message = f"`{black_name}".ljust(24 - len(black_r))+black_r+"`"
 	game.white_message = f"`{white_name}".ljust(24 - len(white_r))+white_r+"`"
 	game.board_message = await command_call.channel.send(content=f"{game.black_message}\n{game.get_emote_representation()}\n{game.white_message}")
+	return True
 
 
 class CommandWatchGame(Command):
@@ -73,7 +77,8 @@ class CommandWatchGame(Command):
 			await command_call.channel.send(f"Game with the id `{game_id}` is ended. Use `{COMMAND_PREFIX} gif {game_id}` instead.")
 			return
 
-		await create_livegame(command_call, game_id, game_info, command_call.author)
+		if not await create_livegame(command_call, game_id, game_info):
+			await command_call.channel.send(f"Game with id `{game_id}` is already being watched in this channel!")
 
 
 class CommandWatchUser(Command):
@@ -95,7 +100,8 @@ class CommandWatchUser(Command):
 
 		game_id = user_info["playing"].split("/")[-2]
 
-		await create_livegame(command_call, game_id, client.games.export(game_id), command_call.author)
+		if not await create_livegame(command_call, game_id, client.games.export(game_id)):
+			await command_call.channel.send(f"User `{command_call.args[0]}` is already being watched in this channel!")
 
 
 class CommandWatchTv(Command):
@@ -124,7 +130,8 @@ class CommandWatchTv(Command):
 			await command_call.channel.send(f"Lichess TV has not selected a new {game_mode} game yet.")
 			return
 
-		await create_livegame(command_call, game_id, game_info, command_call.author)
+		if not await create_livegame(command_call, game_id, game_info):
+			await command_call.channel.send(f"Game with game mode `{game_mode}` is already being watched in this channel!")
 
 
 class CommandWatch(Command):
