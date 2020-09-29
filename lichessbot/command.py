@@ -7,6 +7,7 @@ class Command():
 	help_string = ""
 	aliases = []
 	parameters = []
+	enabled = True
 
 	@classmethod
 	async def call(self, command_call):
@@ -19,7 +20,7 @@ class Command():
 			for i in range(len(self.parameters)):
 
 				curr_param = self.parameters[i]
-				command_call.args.append(curr_param.null)
+				command_call.args.append(curr_param.default)
 
 				try:
 					parsed_arg = curr_param.parse(command_call, command_call.raw_args[i])
@@ -50,8 +51,8 @@ class Command():
 		for param in self.parameters:
 
 			if param.required:
-				usg_str += f" [{param.name}]"
+				usg_str += f" [{param.get_name()}]"
 			else:
-				usg_str += f" <{param.name}>"
+				usg_str += f" <{param.get_name()}>"
 
 		return usg_str

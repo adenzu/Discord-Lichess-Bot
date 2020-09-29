@@ -11,6 +11,7 @@ import discord
 bot = discord.Client()
 
 
+command_list = Command.__subclasses__()
 
 
 
@@ -30,8 +31,8 @@ async def on_message(message):
 		try:
 			call = Call(message)
 
-			for cmd in COMMAND_LIST:
-				if call.command == cmd.name or call.command in cmd.aliases:
+			for cmd in command_list:
+				if cmd.enabled and (call.command == cmd.name or call.command in cmd.aliases):
 					
 					if cmd.name != "help":
 						await call.channel.trigger_typing()

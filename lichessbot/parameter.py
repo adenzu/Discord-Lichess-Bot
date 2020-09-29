@@ -1,41 +1,53 @@
+from lichessbot.command import Command
 from lichessbot.client import client
+import lichessbot.commands
 from lichessbot.config import *
 
 import berserk
 
+COMMAND_LIST = Command.__subclasses__()
 
 class Parameter():
 
 	type_name = ""
 	name = ""
 	required = True
-	null = None
+	default = None
 
-	def __init__(self, name=None, required=True, null=None):
+	def __init__(self, name=None, required=True, default=None):
 		self.required = required
-		self.null = null
+		
+		if default:
+			self.default = default
 		if name:
 			self.name = name
 
 	def parse(self, command_call, arg):
 		return None
 
+	def get_name(self):
+		return self.name
+
+	def get_type_name(self):
+		return self.type_name
+
 
 class ParamString(Parameter):
 
 	type_name = "text"
 	name = "text"
-	null = ""
+	default = None
 
 	def parse(self, command_call, arg):
-		return str(arg) if self.required else self.null
+
+		return str(arg)
 
 
 class ParamGameID(Parameter):
 
 	type_name = "game_id"
 	name = "game"
-	null = ""
+	default = None
 
 	def parse(self, command_call, arg):
 
@@ -43,58 +55,97 @@ class ParamGameID(Parameter):
 			client.games.export(arg)
 			return arg
 		except berserk.exceptions.ResponseError:
-			return None if self.required else self.null
+			return None 
 
 
 class ParamUserID(Parameter):
 
 	type_name = "user_id"
 	name = "user"
-	null = ""
+	default = None
 
 	def parse(self, command_call, arg):
 
 		if len(client.users.get_by_id(arg)):
-			return args
-		return None if self.required else self.null
+			return arg
+		return None 
 
 
 class ParamGameMode(Parameter):
 
 	type_name = "game_mode"
 	name = "mode"
-	null = ""
+	default = "Top Rated"
 
 	def parse(self, command_call, arg):
 
 		for mode in GAME_MODES:
 			if arg.lower() == mode.lower():
 				return mode
-		return None if self.required else self.null
-
-
-class ParamCommand(Parameter):
-
-	type_name = "bot_command"
-	name = "command"
-	null = ""
-
-	def parse(self, command_call, arg):
-
-		if arg in COMMAND_LIST:
-			return arg
-		return None if self.required else self.null
+		return None 
 
 
 class ParamColor(Parameter):
 
 	type_name = "color"
 	name = "color"
-	null = ""
+	default = ""
 
 	def parse(self, command_call, arg):
 
 		for color in ("white", "black"):
 			if arg.lower() == color:
-				return color
-		return None if self.required else self.null
+				return "/"+color
+		return None 
+
+
+class ParamInteger(Parameter):
+
+	type_name = "number"
+	name = "number"
+	default = 1
+
+	def parse(self, command_call, arg):
+
+		try:
+			return int(arg)
+		except ValueError:
+			return None
+
+
+class ParamUnion(Parameter):
+
+	params = []
+	type_names = []
+	names = []
+	default = None
+
+	default_param_class = None
+
+	def __init__(self, *params, name=None, required=True, default_class=None):
+
+		self.params = params
+		self.type_names = [param.get_type_name() for param in params]
+		self.names = [param.get_name() for param in params]
+
+		self.required = required
+		
+		if default_class:
+			self.default_param_class = default_class
+			self.default = default_class.default
+		if name:
+			self.name = name
+
+	def parse(self, command_call, arg):
+
+		for param in self.params:
+			if param.parse(command_call, arg):
+				self.default_param_class = param.__class__
+				return param.parse(command_call, arg)
+		return None 
+
+	def get_type_name(self):
+		return "|".join(self.type_names)
+
+	def get_name(self):
+		return "|".join(self.names)

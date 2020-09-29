@@ -12,22 +12,12 @@ class CommandStats(Command):
 	name = "stats"
 	help_string = "View a user's game stats."
 	aliases = ["statistics"]
-	parameters = [ParamString("user")]
+	parameters = [ParamUserID()]
 
 	@classmethod
 	async def run(self, command_call):
 
-		user_id = command_call.args[0]
-
-		try:
-			user_info = client.users.get_public_data(user_id)
-		except berserk.exceptions.ResponseError:
-			await command_call.channel.send(f"No user exists with id `{user_id}`.")
-			return
-
-		except UnicodeEncodeError:
-			await command_call.channel.send(f"No user exists with id `{user_id}`.")
-			return
+		user_info = client.users.get_public_data(command_call.args[0])
 
 		if "closed" in user_info:
 			await command_call.channel.send(f"Pofile of user `{user_id}` is closed.")

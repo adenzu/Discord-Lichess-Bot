@@ -1,4 +1,3 @@
-from lichessbot.command import Command
 from lichessbot.client import client
 
 
@@ -10,7 +9,6 @@ import discord
 
 
 
-COMMAND_LIST = Command.__subclasses__()
 
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")

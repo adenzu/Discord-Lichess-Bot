@@ -9,15 +9,22 @@ class CommandHelp(Command):
 
 	name = "help"
 	help_string = "View available commands."
-	aliases = ["commands", ""]
-	parameters = []
+	aliases = ["commands"]
+	parameters = [ParamString("command", required=False)]
 
 	@classmethod
 	async def run(self, command_call):
 
 		response = ""
 
-		for c in Command.__subclasses__():
-			response += f"`{c.usage_string()}`\n{c.help_string}\n\n"
+		for command in Command.__subclasses__():
+
+			if command.enabled:
+
+				response += f"`{command.usage_string()}`\n{command.help_string}\n\n"
+
+				if command_call.args[0] == command.name or command_call.args[0] in command.aliases:
+					await command_call.channel.send(f"`{command.usage_string()}`\n{command.help_string}")
+					return
 
 		await command_call.author.send(response)

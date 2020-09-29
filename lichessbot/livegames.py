@@ -7,8 +7,8 @@ import asyncio
 import chess
 
 
-
 ongoing_games = []
+
 
 async def update_live_games():
 	while True:
@@ -110,5 +110,8 @@ class LiveGame:
 			return
 
 		if self.game_info["status"] != "started":
-			await self.board_message.edit(content=f"{self.board_message.content }\n\nGame ended.")
+			try:
+				await self.board_message.edit(content=f"{self.board_message.content }\n\n{self.game_info['winner'].title()} wins!")
+			except KeyError:
+				await self.board_message.edit(content=f"{self.board_message.content }\n\nGame is {self.game_info['status']}.")
 			ongoing_games.remove(self)

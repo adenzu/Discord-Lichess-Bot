@@ -16,12 +16,6 @@ class CommandGif(Command):
 	@classmethod
 	async def run(self, command_call):
 
-		if command_call.args[1] in ("white", "black"):
-			command_call.args[1] = f"/{command_call.args[1]}"
-		elif command_call.args[1] != ParamString.null:
-			await command_call.channel.send(f"Invalid input for: `{self.parameters[1].name}` of type `{self.parameters[1].type_name}`!\nUsage: `{self.usage_string()}`")
-			return
-
 		try:
 			game = client.games.export(command_call.args[0])
 			await command_call.channel.send(f"https://lichess1.org/game/export/gif{command_call.args[1]}/{command_call.args[0]}.gif")

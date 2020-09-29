@@ -13,36 +13,29 @@ class CommandUser(Command):
 	name = "user"
 	help_string = "View a user's profile."
 	aliases = ["profile", "player"]
-	parameters = [ParamString("user")]
+	parameters = [ParamUserID()]
 
 	@classmethod
 	async def run(self, command_call):
 
 		user_id = command_call.args[0]
+		user_info = client.users.get_public_data(command_call.args[0])
 
-		try:
-			user_public_data = client.users.get_public_data(user_id)
-		except berserk.exceptions.ResponseError:
-			await command_call.channel.send(f"No user exists with id `{user_id}`.")
-			return
 
-		if "closed" in user_public_data:
+		if "closed" in user_info:
 			await command_call.channel.send(f"Pofile of user `{user_id}` is closed.")
 		else:
 
-			embed_color = DISCORD_GREEN if user_public_data["online"] else discord.Embed.Empty
-
+			embed_color = DISCORD_GREEN if user_info["online"] else discord.Embed.Empty
 
 
 			try:
-				bio = user_public_data["profile"]["bio"]
+				bio = user_info["profile"]["bio"]
 			except KeyError:
 				bio = ""
 
 
-
-
-			play_time = seconds_conversion(user_public_data["playTime"]["total"])
+			play_time = seconds_conversion(user_info["playTime"]["total"])
 
 			play_time_string = ""
 
@@ -54,8 +47,6 @@ class CommandUser(Command):
 				play_time_string = f"\nPlaytime: {play_time_string[:-1]}\n"
 
 
-
-
 			player_game_gen = get_user_games(user_id)
 			try:
 				last_played_game_str = f"Last played game: https://lichess.org/{next(player_game_gen)['id']}\n"  
@@ -64,10 +55,9 @@ class CommandUser(Command):
 
 
 			try:
-				currently_playing_str = f"Currently playing: {user_public_data['playing']}\n"
+				currently_playing_str = f"Currently playing: {user_info['playing']}\n"
 			except KeyError:
 				currently_playing_str = ""
-
 
 
 			user_info_string = """
@@ -75,10 +65,9 @@ class CommandUser(Command):
 			Member since {}
 
 			{}{}{}
-			""".format(bio, user_public_data["createdAt"].strftime("%m/%d/%Y"), currently_playing_str, last_played_game_str, play_time_string)
+			""".format(bio, user_info["createdAt"].strftime("%m/%d/%Y"), currently_playing_str, last_played_game_str, play_time_string)
 
 
-
-			embed = discord.Embed(title=user_public_data["username"], description=user_info_string, color=embed_color, url=f"https://lichess.org/@/{user_id}")
+			embed = discord.Embed(title=user_info["username"], description=user_info_string, color=embed_color, url=f"https://lichess.org/@/{user_id}")
 
 			await command_call.channel.send(embed=embed)

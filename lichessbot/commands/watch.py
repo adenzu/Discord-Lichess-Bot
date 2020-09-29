@@ -9,18 +9,44 @@ from lichessbot.util import *
 import discord
 
 
-async def create_livegame(command_call, game_id, game_info):
+async def create_livegame(command_call, game_id, game_info, author):
 	game = LiveGame(game_id)
+
 	await game.update_game()
+	game.author = author
 
 	white = game_info["players"]["white"]
-	white_r = str(white["rating"])
 
 	black = game_info["players"]["black"]
-	black_r = str(black["rating"])
+	
 
-	game.black_message = f"`{black['user']['name']}".ljust(24 - len(black_r))+black_r+"`"
-	game.white_message = f"`{white['user']['name']}".ljust(24 - len(white_r))+white_r+"`"
+	try:
+		white_name = white['user']['name']
+
+		try:
+			white_r = str(white["rating"])
+		except KeyError:
+			black_r = ""
+
+	except KeyError:
+		white_name = "AI"
+		white_r = str(white['aiLevel'])
+
+	
+	try:
+		black_name = black['user']['name']
+
+		try:
+			black_r = str(black["rating"])
+		except KeyError:
+			black_r = ""
+
+	except KeyError:
+		black_name = "AI"
+		black_r = str(black['aiLevel'])
+
+	game.black_message = f"`{black_name}".ljust(24 - len(black_r))+black_r+"`"
+	game.white_message = f"`{white_name}".ljust(24 - len(white_r))+white_r+"`"
 	game.board_message = await command_call.channel.send(content=f"{game.black_message}\n{game.get_emote_representation()}\n{game.white_message}")
 
 
@@ -30,6 +56,7 @@ class CommandWatchGame(Command):
 	help_string = "Watch an ongoing chess game."
 	aliases = []
 	parameters = [ParamGameID()]
+	enabled = False
 
 	@classmethod
 	async def run(self, command_call):
@@ -46,7 +73,7 @@ class CommandWatchGame(Command):
 			await command_call.channel.send(f"Game with the id `{game_id}` is ended. Use `{COMMAND_PREFIX} gif {game_id}` instead.")
 			return
 
-		await create_livegame(command_call, game_id, game_info)
+		await create_livegame(command_call, game_id, game_info, command_call.author)
 
 
 class CommandWatchUser(Command):
@@ -54,27 +81,21 @@ class CommandWatchUser(Command):
 	name = "watch-user"
 	help_string = "Watch an ongoing chess game of a player."
 	aliases = []
-	parameters = [ParamString("user")]
+	parameters = [ParamUserID()]
+	enabled = False
 
 	@classmethod
 	async def run(self, command_call):
 
-		user_id = command_call.args[0]
-
-		try:
-			user_info = client.users.get_public_data(user_id)
-		except berserk.exceptions.ResponseError:
-			await command_call.channel.send(f"No user exists with id `{user_id}`.")
-			return
+		user_info = client.users.get_public_data(command_call.args[0])
 
 		if "playing" not in user_info:
-			await command_call.channel.send(f"User `{user_id}` is currently not playing a game.")
+			await command_call.channel.send(f"User `{command_call.args[0]}` is currently not playing a game.")
 			return
 
 		game_id = user_info["playing"].split("/")[-2]
 
-		await create_livegame(command_call, game_id, client.games.export(game_id))
-
+		await create_livegame(command_call, game_id, client.games.export(game_id), command_call.author)
 
 
 class CommandWatchTv(Command):
@@ -82,34 +103,43 @@ class CommandWatchTv(Command):
 	name = "watch-tv"
 	help_string = "Watch a game mode of TV channels."
 	aliases = ["tv"]
-	parameters = [ParamString("game mode", required=False)]
+	parameters = [ParamGameMode(required=False)]
+	enabled = False
 
 	@classmethod
 	async def run(self, command_call):
 
-		if command_call.args[0] == ParamString.null:
-			game_mode = "Top Rated"
-			game_id = client.games.get_tv_channels()[game_mode]["gameId"]
+		game_mode = command_call.args[0]
+		game_id = client.games.get_tv_channels()[game_mode]["gameId"]
+		game_info = client.games.export(game_id)
+
+		try:
 			game_info = client.games.export(game_id)
-		else:
-			game_mode = command_call.args[0].lower()
 
-			try:
-				tv_games = client.games.get_tv_channels()
-
-				for mode in tv_games:
-					if mode.lower() == game_mode:
-						game_id = tv_games[mode]["gameId"]
-					
-				game_info = client.games.export(game_id)
-
-			except UnboundLocalError:
-				await command_call.channel.send(f"{game_mode} is not a valid game mode.")
-				return
-
+		except UnboundLocalError:
+			await command_call.channel.send(f"{game_mode} is not a valid game mode.")
+			return
 
 		if game_info["status"] != "started":
 			await command_call.channel.send(f"Lichess TV has not selected a new {game_mode} game yet.")
 			return
 
-		await create_livegame(command_call, game_id, game_info)
+		await create_livegame(command_call, game_id, game_info, command_call.author)
+
+
+class CommandWatch(Command):
+
+	name = "watch"
+	help_string = "Watch a game or a user or a game mode of TV channels."
+	aliases = []
+	parameters = [ParamUnion(ParamGameID(), ParamGameMode(), ParamUserID(), required=False, default_class=ParamGameMode)]
+
+	@classmethod
+	async def run(self, command_call):
+
+		if self.parameters[0].default_param_class == ParamGameID:
+			await CommandWatchGame.call(command_call)
+		elif self.parameters[0].default_param_class == ParamGameMode:
+			await CommandWatchTv.call(command_call)
+		elif self.parameters[0].default_param_class == ParamUserID:
+			await CommandWatchUser.call(command_call)
