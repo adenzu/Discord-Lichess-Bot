@@ -32,8 +32,12 @@ async def create_livegame(command_call, game_id, game_info):
 			black_r = ""
 
 	except KeyError:
-		white_name = "AI"
-		white_r = str(white['aiLevel'])
+		try:
+			white_name = "AI"
+			white_r = str(white['aiLevel'])
+		except KeyError:
+			white_name = "Anon"
+			white_r = ""
 
 	
 	try:
@@ -45,8 +49,12 @@ async def create_livegame(command_call, game_id, game_info):
 			black_r = ""
 
 	except KeyError:
-		black_name = "AI"
-		black_r = str(black['aiLevel'])
+		try:
+			black_name = "AI"
+			black_r = str(black['aiLevel'])
+		except KeyError:
+			black_name = "Anon"
+			black_r = ""
 
 	game.black_message = f"`{black_name}".ljust(24 - len(black_r))+black_r+"`"
 	game.white_message = f"`{white_name}".ljust(24 - len(white_r))+white_r+"`"
