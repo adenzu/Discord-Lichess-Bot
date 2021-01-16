@@ -15,12 +15,12 @@ class CommandStats(Command):
 	parameters = [ParamUserID()]
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		user_info = client.users.get_public_data(command_call.args[0])
 
 		if "closed" in user_info:
-			await command_call.channel.send(f"Pofile of user `{user_id}` is closed.")
+			await command_call.channel.send(f"Profile of user `{command_call.args[0]}` is closed.")
 		else:
 
 			embed_color = DISCORD_GREEN if user_info["online"] else discord.Embed.Empty

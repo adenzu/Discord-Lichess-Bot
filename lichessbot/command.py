@@ -10,23 +10,23 @@ class Command():
 	enabled = True
 
 	@classmethod
-	async def call(self, command_call):
+	async def call(cls, command_call):
 
-		if len(command_call.raw_args) > len(self.parameters):
-			await command_call.channel.send(f"Too much input!\nUsage: `{self.usage_string()}`")
+		if len(command_call.raw_args) > len(cls.parameters):
+			await command_call.channel.send(f"Too much input!\nUsage: `{cls.usage_string()}`")
 
 		else:
 
-			for i in range(len(self.parameters)):
+			for i in range(len(cls.parameters)):
 
-				curr_param = self.parameters[i]
+				curr_param = cls.parameters[i]
 				command_call.args.append(curr_param.default)
 
 				try:
 					parsed_arg = curr_param.parse(command_call, command_call.raw_args[i])
 
 					if parsed_arg == None:
-						await command_call.channel.send(f"Invalid input for: `{curr_param.get_name()}` of type `{curr_param.get_type_name()}`!\nUsage: `{self.usage_string()}`")
+						await command_call.channel.send(f"Invalid input for: `{curr_param.get_name()}` of type `{curr_param.get_type_name()}`!\nUsage: `{cls.usage_string()}`")
 						return
 
 					command_call.args[i] = parsed_arg
@@ -34,21 +34,21 @@ class Command():
 				except IndexError:
 
 					if curr_param.required:
-						await command_call.channel.send(f"You must specify: `{curr_param.get_name()}` of type `{curr_param.get_type_name()}`!\nUsage: `{self.usage_string()}`")
+						await command_call.channel.send(f"You must specify: `{curr_param.get_name()}` of type `{curr_param.get_type_name()}`!\nUsage: `{cls.usage_string()}`")
 						return
 
-			await self.run(command_call)
+			await cls.run(command_call)
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 		pass
 
 	@classmethod
-	def usage_string(self):
+	def usage_string(cls):
 
-		usg_str = f"{COMMAND_PREFIX} {self.name}"
+		usg_str = f"{COMMAND_PREFIX} {cls.name}"
 
-		for param in self.parameters:
+		for param in cls.parameters:
 
 			if param.required:
 				usg_str += f" [{param.get_name()}]"

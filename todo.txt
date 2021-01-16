@@ -1,0 +1,3 @@
+change live game list to server based class list, so games outside command servers are not checked
+
+add tournament related features
