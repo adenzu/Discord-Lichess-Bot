@@ -17,7 +17,7 @@ class CommandWatchGame(Command):
 	enabled = True
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		game_index = command_call.args[0]
 
@@ -25,7 +25,7 @@ class CommandWatchGame(Command):
 
 		for game in ongoing_games[::-1]:
 			
-			if game.author == command_call.author:
+			if game.author == command_call.author and game.board_message.channel == command_call.channel:
 				game_index -= 1
 				
 				if not game_index:
