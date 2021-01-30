@@ -7,7 +7,7 @@ class Command():
 	help_string = ""
 	aliases = []
 	parameters = []
-	enabled = True
+	enabled = False
 
 	@classmethod
 	async def call(cls, command_call):

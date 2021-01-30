@@ -34,7 +34,7 @@ async def on_message(message):
 			for cmd in command_list:
 				if cmd.enabled and (call.command == cmd.name or call.command in cmd.aliases):
 					
-					if cmd.name != "help":
+					if not cmd.name in ["help", "stop"]:
 						await call.channel.trigger_typing()
 	
 					call.executed = True

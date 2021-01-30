@@ -1,3 +1,4 @@
-change live game list to server based class list, so games outside command servers are not checked
+change live game list to server based class list, so games outside command servers are not checked //seems like no huge improvements is made by doing this, so not doing it now
 
 add tournament related features
+add puzzle related features

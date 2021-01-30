@@ -39,7 +39,6 @@ class ParamString(Parameter):
 	default = None
 
 	def parse(self, command_call, arg):
-
 		return str(arg)
 
 
@@ -113,6 +112,20 @@ class ParamInteger(Parameter):
 			return None
 
 
+class ParamTournamentID(Parameter):
+	
+	type_name = "tournament_id"
+	name = "tournament"
+	default = None
+
+	def parse(self, command_call, arg):
+
+		try:
+			client.tournaments.stream_results(arg)
+			return arg
+		except berserk.exceptions.ResponseError:
+			return None 
+
 class ParamUnion(Parameter):
 
 	params = []
@@ -121,6 +134,7 @@ class ParamUnion(Parameter):
 	default = None
 
 	default_param_class = None
+	default_param_class_parsed = None
 
 	def __init__(self, *params, name=None, required=True, default_class=None):
 
@@ -138,9 +152,11 @@ class ParamUnion(Parameter):
 
 	def parse(self, command_call, arg):
 
+		default_param_class_parsed = None # Credit of the fix goes to godofmilker
+
 		for param in self.params:
 			if param.parse(command_call, arg):
-				self.default_param_class = param.__class__
+				self.default_param_class_parsed = param.__class__
 				return param.parse(command_call, arg)
 		return None 
 

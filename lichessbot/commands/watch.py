@@ -71,7 +71,7 @@ class CommandWatchGame(Command):
 	enabled = False
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		game_id = command_call.args[0]
 
@@ -98,7 +98,7 @@ class CommandWatchUser(Command):
 	enabled = False
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		user_info = client.users.get_public_data(command_call.args[0])
 
@@ -121,7 +121,7 @@ class CommandWatchTv(Command):
 	enabled = False
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		game_mode = command_call.args[0]
 		game_id = client.games.get_tv_channels()[game_mode]["gameId"]
@@ -150,11 +150,11 @@ class CommandWatch(Command):
 	parameters = [ParamUnion(ParamGameID(), ParamGameMode(), ParamUserID(), required=False, default_class=ParamGameMode)]
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
-		if self.parameters[0].default_param_class == ParamGameID:
+		if cls.parameters[0].default_param_class_parsed == ParamGameID:
 			await CommandWatchGame.call(command_call)
-		elif self.parameters[0].default_param_class == ParamGameMode:
+		elif cls.parameters[0].default_param_class_parsed == ParamGameMode:
 			await CommandWatchTv.call(command_call)
-		elif self.parameters[0].default_param_class == ParamUserID:
+		elif cls.parameters[0].default_param_class_parsed == ParamUserID:
 			await CommandWatchUser.call(command_call)

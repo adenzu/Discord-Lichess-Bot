@@ -16,7 +16,7 @@ class CommandUser(Command):
 	parameters = [ParamUserID()]
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		user_id = command_call.args[0]
 		user_info = client.users.get_public_data(command_call.args[0])

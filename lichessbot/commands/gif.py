@@ -14,7 +14,7 @@ class CommandGif(Command):
 	parameters = [ParamGameID(), ParamColor(required=False)]
 
 	@classmethod
-	async def run(self, command_call):
+	async def run(cls, command_call):
 
 		try:
 			game = client.games.export(command_call.args[0])
