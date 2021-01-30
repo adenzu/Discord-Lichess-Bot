@@ -152,7 +152,7 @@ class ParamUnion(Parameter):
 
 	def parse(self, command_call, arg):
 
-		default_param_class_parsed = None # Credit of the fix goes to godofmilker
+		self.default_param_class_parsed = self.default_param_class # Credit of the fix goes to godofmilker
 
 		for param in self.params:
 			if param.parse(command_call, arg):
