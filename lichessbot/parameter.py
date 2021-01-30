@@ -147,6 +147,7 @@ class ParamUnion(Parameter):
 		if default_class:
 			self.default_param_class = default_class
 			self.default = default_class.default
+			self.parsed_class = default_class
 		if name:
 			self.name = name
 
