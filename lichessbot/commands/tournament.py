@@ -14,6 +14,7 @@ class CommandTournament(Command):
 	help_string = "View ongoing tournaments or view a specified tournament."
 	aliases = []
 	parameters = [ParamTournamentID(required=False)]
+	enabled = False
 
 	@classmethod
 	async def run(cls, command_call):
