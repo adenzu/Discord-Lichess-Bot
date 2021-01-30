@@ -134,7 +134,7 @@ class ParamUnion(Parameter):
 	default = None
 
 	default_param_class = None
-	default_param_class_parsed = None
+	parsed_class = None
 
 	def __init__(self, *params, name=None, required=True, default_class=None):
 
@@ -152,13 +152,19 @@ class ParamUnion(Parameter):
 
 	def parse(self, command_call, arg):
 
-		self.default_param_class_parsed = self.default_param_class # Credit of the fix goes to godofmilker
-
 		for param in self.params:
 			if param.parse(command_call, arg):
-				self.default_param_class_parsed = param.__class__
+				self.parsed_class = param.__class__
 				return param.parse(command_call, arg)
 		return None 
+
+	# Credit for the bugfix goes to godofmilker
+	def get_parsed_class(self):
+
+		parsed_class = self.parsed_class
+		self.parsed_class = self.default_param_class
+
+		return parsed_class
 
 	def get_type_name(self):
 		return "|".join(self.type_names)

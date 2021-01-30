@@ -152,9 +152,9 @@ class CommandWatch(Command):
 	@classmethod
 	async def run(cls, command_call):
 
-		if cls.parameters[0].default_param_class_parsed == ParamGameID:
+		if cls.parameters[0].get_parsed_class() == ParamGameID:
 			await CommandWatchGame.call(command_call)
-		elif cls.parameters[0].default_param_class_parsed == ParamGameMode:
+		elif cls.parameters[0].get_parsed_class() == ParamGameMode:
 			await CommandWatchTv.call(command_call)
-		elif cls.parameters[0].default_param_class_parsed == ParamUserID:
+		elif cls.parameters[0].get_parsed_class() == ParamUserID:
 			await CommandWatchUser.call(command_call)
