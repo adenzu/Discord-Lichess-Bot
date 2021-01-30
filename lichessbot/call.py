@@ -25,7 +25,7 @@ class Call():
 
 		try:
 			self.raw_args = self.content.split()[1:]
-			self.command = self.raw_args.pop()
+			self.command = self.raw_args.pop(0)
 			self.args = []
 			self.executed = False
 		except IndexError:
