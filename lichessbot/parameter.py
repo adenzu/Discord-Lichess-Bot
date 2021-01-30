@@ -157,6 +157,7 @@ class ParamUnion(Parameter):
 			if param.parse(command_call, arg):
 				self.parsed_class = param.__class__
 				return param.parse(command_call, arg)
+				
 		return None 
 
 	# Credit for the bugfix goes to godofmilker
