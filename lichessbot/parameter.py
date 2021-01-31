@@ -65,8 +65,11 @@ class ParamUserID(Parameter):
 
 	def parse(self, command_call, arg):
 
-		if len(client.users.get_by_id(arg)):
-			return arg
+		try:
+			if len(client.users.get_by_id(arg)):
+				return arg
+		except:
+			pass
 		return None 
 
 
