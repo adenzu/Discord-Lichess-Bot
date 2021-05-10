@@ -2,3 +2,4 @@ change live game list to server based class list, so games outside command serve
 
 add tournament related features
 add puzzle related features
+add user id as parameter in gif command to get last game of user as game
