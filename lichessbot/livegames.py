@@ -118,7 +118,7 @@ class LiveGame:
 		game_variant = self.game_info["variant"]
 
 		if game_variant == "standard":
-			self.board == chess.Board()
+			self.board = chess.Board()
 		elif game_variant == "antichess":
 			self.board = chess.variant.AntichessBoard()
 		elif game_variant == "atomic":
