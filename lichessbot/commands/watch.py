@@ -9,59 +9,6 @@ from lichessbot.util import *
 import discord
 
 
-async def create_livegame(command_call, game_id, game_info):
-	
-	if (game_id, command_call.channel) in ongoing_games:
-		return False
-
-	game = LiveGame(game_id)
-
-	await game.update_game()
-	game.author = command_call.author
-
-	white = game_info["players"]["white"]
-
-	black = game_info["players"]["black"]
-	
-	try:
-		white_name = white['user']['name']
-
-		try:
-			white_r = str(white["rating"])
-		except KeyError:
-			black_r = ""
-
-	except KeyError:
-		try:
-			white_name = "AI"
-			white_r = str(white['aiLevel'])
-		except KeyError:
-			white_name = "Anon"
-			white_r = ""
-
-	
-	try:
-		black_name = black['user']['name']
-
-		try:
-			black_r = str(black["rating"])
-		except KeyError:
-			black_r = ""
-
-	except KeyError:
-		try:
-			black_name = "AI"
-			black_r = str(black['aiLevel'])
-		except KeyError:
-			black_name = "Anon"
-			black_r = ""
-
-	game.black_message = f"`{black_name}".ljust(24 - len(black_r))+black_r+"`"
-	game.white_message = f"`{white_name}".ljust(24 - len(white_r))+white_r+"`"
-	game.board_message = await command_call.channel.send(content=f"{game.black_message}\n{game.get_emote_representation()}\n{game.white_message}")
-	return True
-
-
 class CommandWatchGame(Command):
 
 	name = "watch-game"

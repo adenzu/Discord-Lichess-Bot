@@ -81,9 +81,12 @@ class ParamGameMode(Parameter):
 
 	def parse(self, command_call, arg):
 
+		valid_arg = arg.lower().replace("_", " ")
+
 		for mode in GAME_MODES:
-			if arg.lower() == mode.lower():
+			if valid_arg == mode.lower():
 				return mode
+				
 		return None 
 
 

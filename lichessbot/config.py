@@ -9,8 +9,6 @@ import discord
 
 
 
-
-
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 
