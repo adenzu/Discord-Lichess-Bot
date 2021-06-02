@@ -27,4 +27,4 @@ class CommandHelp(Command):
 					await command_call.channel.send(f"`{command.usage_string()}`\n{command.help_string}")
 					return
 
-		await command_call.author.send(f"`<param>` means the parameter is not required. `[param]` is otherwise.\n\n{response}")
+		await command_call.author.send(f"`[param]` parameters are required for the command, `<param>` parameters are not mandatory.\n\n{response}")

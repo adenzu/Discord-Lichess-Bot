@@ -1,7 +1,7 @@
 from lichessbot.command import Command
 from lichessbot.client import client
-import lichessbot.commands
 from lichessbot.config import *
+import lichessbot.commands
 
 import berserk
 
@@ -69,7 +69,7 @@ class ParamUserID(Parameter):
 			if len(client.users.get_by_id(arg)):
 				return arg
 		except:
-			pass
+			return None
 		return None 
 
 
@@ -95,9 +95,8 @@ class ParamColor(Parameter):
 
 	def parse(self, command_call, arg):
 
-		for color in ("white", "black"):
-			if arg.lower() == color:
-				return "/"+color
+		if arg.lower() in ("white", "black"):
+			return "/" + arg.lower()
 		return None 
 
 
@@ -157,9 +156,10 @@ class ParamUnion(Parameter):
 	def parse(self, command_call, arg):
 
 		for param in self.params:
-			if param.parse(command_call, arg):
+			curr_parse = param.parse(command_call, arg)
+			if curr_parse:
 				self.parsed_class = param.__class__
-				return param.parse(command_call, arg)
+				return curr_parse
 				
 		return None 
 

@@ -54,14 +54,12 @@ class CommandTournament(Command):
 			command_call.channel.send(embed=embed)
 
 		else:
-			
-			ongoing_tournaments = client.tournaments.get()
 
-			if len(ongoing_tournaments["started"]):
+			if len(tournaments["started"]):
 
 				embed_text = "Tournament Name                  Number of Players\n\n" 
 
-				for ongoing_tournament in ongoing_tournaments:
+				for ongoing_tournament in tournaments:
 					embed_text += f"[{ongoing_tournament['fullName']}](https://lichess.org/tournament/{ongoing_tournament['id']})".ljust(45) + f"{ongoing_tournament['nbPlayers']}\n".rjust(5)
 
 				embed = discord.Embed(title="Ongoing Tournaments", description=embed_text, url="https://lichess.org/tournament")

@@ -2,8 +2,6 @@ from lichessbot.exceptions import *
 from lichessbot.config import *
 from lichessbot.util import *
 
-import traceback
-
 class Call():
 
 	def __init__(self, message):
