@@ -32,9 +32,9 @@ class CommandWatchGame(Command):
 					chosen_game = game
 					break
 
-
 		if chosen_game:
 			await chosen_game.board_message.edit(content=f"{chosen_game.board_message.content}\n\n{command_call.author.name} stopped stream.")
 			ongoing_games.remove(chosen_game)
+			chosen_game.stopped = True
 		else:
 			await command_call.channel.send(f"You have started watching only `{command_call.args[0]-game_index}` games that are still being streamed!")

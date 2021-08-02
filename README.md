@@ -27,3 +27,7 @@ A bot that is capable of channeling some of the functionalities of lichess.org t
 - [ ] Add tournament related features
 - [ ] Add puzzle related features
 
+## Media
+
+![Watching bullet](media/crazyhouse.gif)
+![Watching crazyhouse](media/bullet.gif)

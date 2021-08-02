@@ -38,4 +38,4 @@ EMOTE_PIECE_SYMBOLS = {
 }
 
 
-GAME_MODES = list(client.games.get_tv_channels().keys())
+GAME_MODES = list(client.games.get_tv_channels())

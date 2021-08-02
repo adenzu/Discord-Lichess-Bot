@@ -67,8 +67,8 @@ async def create_livegame(command_call, game_id, game_info):
 			black_r = ""
 
 
-	game.black_message = f"`{black_name} ".ljust(23 - len(black_r)) + black_r + "`"
-	game.white_message = f"`{white_name} ".ljust(23 - len(white_r)) + white_r + "`"
+	game.black_message = f"`{black_name} ".ljust(24 - len(black_r)) + black_r + "`"
+	game.white_message = f"`{white_name} ".ljust(24 - len(white_r)) + white_r + "`"
 	game.board_message = await command_call.channel.send(content=f"{game.black_message}\n{game.get_emote_representation()}\n{game.white_message}")
 	return True
 
@@ -87,6 +87,7 @@ class LiveGame:
 	def __init__(self, game_id):
 
 		self.game_id = game_id
+		self.stopped = False
 
 		self.board = None
 		
@@ -173,6 +174,10 @@ class LiveGame:
 			return
 
 	async def update_game(self):
+
+		if self.stopped:
+			ongoing_games.remove(self)
+			return
 
 		self.penalty_time -= LIVE_GAME_REFRESH_RATE
 
