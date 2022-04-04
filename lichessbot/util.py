@@ -29,6 +29,6 @@ def seconds_conversion_text(seconds):
 
 	for time_type in equal_time:
 		if equal_time[time_type]:
-			time_string += f"{equal_time[time_type]} {time_type}"
+			time_string += f"{equal_time[time_type]} {time_type} "
 
 	return time_string

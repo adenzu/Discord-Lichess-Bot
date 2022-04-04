@@ -25,7 +25,9 @@ class CommandTournament(Command):
 		if tournament_id:
 			
 			try:
-				participant_iter = client.tournaments.stream_results(tournament_id)
+				path = f'api/tournament/{tournament_id}/results'
+				params = {'nb': None}
+				participant_iter = client.tournaments._r.get(path, params=params, stream=True)
 			except berserk.exceptions.ResponseError:
 				await command_call.channel.send(f"No tournament exist with id `{tournament_id}`.")
 				return 
@@ -47,11 +49,11 @@ class CommandTournament(Command):
 			for i in range(10):
 
 				participant_info = next(participant_iter)
-				embed_text += f"{i} {participant_info['username']} {participant_info['rating']}".ljust(30) + f"{participant_info['score']}\n".rjust(5)
+				embed_text += f"{i + 1}) {participant_info['username']} {participant_info['rating']}".ljust(30) + f"{participant_info['score']}\n".rjust(5)
 
 			embed = discord.Embed(title=tournament_info["fullName"], description=embed_text, url=tournament_url)
 
-			command_call.channel.send(embed=embed)
+			await command_call.channel.send(embed=embed)
 
 		else:
 
@@ -59,12 +61,12 @@ class CommandTournament(Command):
 
 				embed_text = "Tournament Name                  Number of Players\n\n" 
 
-				for ongoing_tournament in tournaments:
+				for ongoing_tournament in tournaments["started"]:
 					embed_text += f"[{ongoing_tournament['fullName']}](https://lichess.org/tournament/{ongoing_tournament['id']})".ljust(45) + f"{ongoing_tournament['nbPlayers']}\n".rjust(5)
 
 				embed = discord.Embed(title="Ongoing Tournaments", description=embed_text, url="https://lichess.org/tournament")
 
-				command_call.channel.send(embed=embed)
+				await command_call.channel.send(embed=embed)
 
 			else:
-				command_call.channel.send(f"There's currently no ongoing tournament.")
+				await command_call.channel.send(f"There's currently no ongoing tournament.")

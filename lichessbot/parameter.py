@@ -126,7 +126,9 @@ class ParamTournamentID(Parameter):
 	def parse(self, command_call, arg):
 
 		try:
-			client.tournaments.stream_results(arg)
+			path = f'api/tournament/{arg}/results'
+			params = {'nb': None}
+			client.tournaments._r.get(path, params=params, stream=True)
 			return arg
 		except berserk.exceptions.ResponseError:
 			return None 

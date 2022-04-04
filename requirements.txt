@@ -1,4 +1,5 @@
 discord.py
-berserk
+berserk-downstream
 chess
 python-dotenv
+numpy
